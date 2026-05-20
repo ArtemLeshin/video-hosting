@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.http import HttpResponse # Добавили импорт для index
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
@@ -9,6 +10,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Video, Comment, Profile
 from .serializers import VideoSerializer, CommentSerializer
+
+# --- ТО, ЧТО МЫ ПОТЕРЯЛИ: ГЛАВНАЯ СТРАНИЦА БЭКЕНДА ---
+def index(request):
+    return HttpResponse("Backend is running perfectly!")
 
 # --- ЛОГИКА ЛАЙКОВ ---
 @api_view(['POST'])
@@ -35,7 +40,6 @@ def toggle_like(request, pk):
 class VideoListCreateView(generics.ListCreateAPIView):
     queryset = Video.objects.all().order_by('-created_at') 
     serializer_class = VideoSerializer
-    # SessionAuthentication позволяет гостям заходить без токена, а TokenAuthentication подхватит авторизованных
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
