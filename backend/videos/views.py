@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication 
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.views import APIView
@@ -35,17 +35,9 @@ def toggle_like(request, pk):
 class VideoListCreateView(generics.ListCreateAPIView):
     queryset = Video.objects.all().order_by('-created_at') 
     serializer_class = VideoSerializer
-    
-    # Изменяем поведение: если это GET запрос, мы ВООБЩЕ игнорируем сломанные токены авторизации
-    def get_authenticators(self):
-        if self.request.method == 'GET':
-            return []
-        return [TokenAuthentication()]
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+    # SessionAuthentication позволяет гостям заходить без токена, а TokenAuthentication подхватит авторизованных
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -59,17 +51,8 @@ class VideoListCreateView(generics.ListCreateAPIView):
 class VideoDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
-    
-    # Для деталей видео (GET) делаем то же самое, чтобы не падать на 401
-    def get_authenticators(self):
-        if self.request.method == 'GET':
-            return []
-        return [TokenAuthentication()]
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -91,16 +74,8 @@ def update_avatar(request):
 # --- КОММЕНТАРИИ ---
 class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
-    
-    def get_authenticators(self):
-        if self.request.method == 'GET':
-            return []
-        return [TokenAuthentication()]
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         return Comment.objects.filter(video_id=self.kwargs['video_id']).order_by('-created_at')
