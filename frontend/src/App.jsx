@@ -426,13 +426,35 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     if (!file) return;
     const formData = new FormData();
     formData.append('avatar', file);
-    
-    // ИСПРАВЛЕНО: Сменили эндпоинт с /api/videos/ на эндпоинт аватара
-    axios.post('https://mutube-dreamshelter.amvera.io/api/user/avatar/', formData, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'multipart/form-data' }
-    }).then(() => { 
+
+    // ВАРИАНТ 1: Пробуем обновить через эндпоинт профиля (как и баннер)
+    axios.patch('https://mutube-dreamshelter.amvera.io/api/user/profile/', formData, {
+      headers: { 
+        'Authorization': `Token ${token}`, 
+        'Content-Type': 'multipart/form-data' 
+      }
+    })
+    .then(() => { 
       refreshVideos(); 
-    }).catch(err => console.error("Ошибка аватара:", err));
+    })
+    .catch(err => {
+      console.warn("Эндпоинт профиля не подошел, пробуем отдельный эндпоинт аватара...");
+      
+      // ВАРИАНТ 2: Если первый упал, пробуем изолированный урл (строго со слэшем на конце)
+      axios.post('https://mutube-dreamshelter.amvera.io/api/user/avatar/', formData, {
+        headers: { 
+          'Authorization': `Token ${token}`, 
+          'Content-Type': 'multipart/form-data' 
+        }
+      })
+      .then(() => { 
+        refreshVideos(); 
+      })
+      .catch(finalErr => {
+        console.error("Оба эндпоинта вернули ошибку. Проверь videos/urls.py на бэкенде!", finalErr);
+        alert("Не удалось загрузить аватар. Проверь консоль браузера.");
+      });
+    });
   };
 
   const handleUpload = (e) => {
@@ -476,12 +498,21 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
           <div className="profile-user-core">
             <div className="avatar-wrapper">
               <div className="avatar-circle">
-                {profileOwnerVideo?.author?.avatar ? (
-                  <img src={profileOwnerVideo.author.avatar} alt="" className="profile-avatar-img" />
-                ) : (
-                  profileOwnerName?.[0].toUpperCase()
-                )}
-              </div>
+                <div className="avatar-circle">
+                  {profileOwnerVideo?.author?.avatar ? (
+                    <img 
+                      src={profileOwnerVideo.author.avatar} 
+                      alt="" 
+                      className="profile-avatar-img" 
+                      onError={(e) => {
+                        e.target.style.display = 'none'; // Скрываем битый URL
+                        e.target.parentNode.innerText = profileOwnerName?.[0].toUpperCase(); // Ставим букву
+                      }}
+                    />
+                  ) : (
+                    profileOwnerName?.[0].toUpperCase()
+                  )}
+                </div>
               {isMyOwnProfile && (
                 <label className="avatar-edit-label">
                   <span>📷</span>
