@@ -375,6 +375,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
 
 // --- СТРАНИЦА: ПРОФИЛЬ ---
 
+// --- СТРАНИЦА: ПРОФИЛЬ ---
 function Profile({ token, currentUsername, videos, refreshVideos, onLogout, searchQuery, setSearchQuery, userAvatar }) {
   const { userId } = useParams(); 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -427,9 +428,12 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     if (!file) return;
     
     const formData = new FormData();
+    // Передаем файл под всеми возможными именами, чтобы Django точно нашёл свой ключ
     formData.append('avatar', file); 
+    formData.append('image', file);
+    formData.append('avatar_file', file);
+    formData.append('profile_picture', file);
     
-    // Стучимся строго PATCH-методом на рабочий эндпоинт профиля (как у баннера)
     axios.patch('https://mutube-dreamshelter.amvera.io/api/user/profile/', formData, {
       headers: { 
         'Authorization': `Token ${token}`, 
@@ -441,7 +445,7 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     })
     .catch(err => {
       console.error("Ошибка при сохранении аватара через профиль:", err.response?.data || err);
-      alert("Не удалось сохранить аватар. Проверь консоль.");
+      alert("Не удалось сохранить аватар. Проверь ответы бэкенда в консоли.");
     });
   };
 
