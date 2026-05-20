@@ -19,13 +19,11 @@ function Header({ username, searchQuery, setSearchQuery, onLogout, userAvatar })
 
   return (
     <header className="header">
-      {/* ЛОГОТИП */}
       <Link to="/" className="logo-section">
         <img src={logo} alt="MyTube Logo" className="logo-img" />
         <h2 className="logo-text">MyTube</h2>
       </Link>
       
-      {/* ПОИСК */}
       <div className="search-wrapper">
         <input 
           type="text" 
@@ -37,11 +35,9 @@ function Header({ username, searchQuery, setSearchQuery, onLogout, userAvatar })
         />
       </div>
 
-      {/* ПАНЕЛЬ ПОЛЬЗОВАТЕЛЯ */}
       <div className="user-section">
         {username ? (
           <div className="user-controls">
-            {/* Блок профиля: Аватарка + Никнейм */}
             <Link to="/profile" className="profile-link-wrapper">
               <div className="header-avatar-container">
                 {userAvatar ? (
@@ -51,14 +47,12 @@ function Header({ username, searchQuery, setSearchQuery, onLogout, userAvatar })
                     className="header-avatar-img" 
                   />
                 ) : (
-                  /* Заглушка, если у пользователя нет аватара */
                   <div className="header-avatar-placeholder">
                     {username[0].toUpperCase()}
                   </div>
                 )}
               </div>
             </Link>
-
             <button onClick={onLogout} className="logout-btn">Выйти</button>
           </div>
         ) : (
@@ -82,20 +76,20 @@ function VideoList({ videos, searchQuery, setSearchQuery, username, onLogout, us
         onLogout={onLogout} 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery}
-        userAvatar={userAvatar} /* ИСПРАВЛЕНО: Теперь берется из пропсов VideoList */
+        userAvatar={userAvatar}
       />
       
       <main className="video-grid">
         {filteredVideos.map(video => (
           <div key={video.id} className="video-card">
             <Link to={`/video/${video.id}`} className="thumbnail-wrapper">
-              <img src={video.thumbnail} alt={video.title} className="video-thumbnail" />
+              <img src={video.thumbnail.startsWith('http') ? video.thumbnail : `https://mutube-dreamshelter.amvera.io${video.thumbnail}`} alt={video.title} className="video-thumbnail" />
             </Link>
 
             <div className="video-card-content">
               <Link to={`/profile/${video.author?.id}`} className="author-avatar-link">
                 {video.author?.avatar ? (
-                  <img src={video.author.avatar} alt="" className="mini-avatar" />
+                  <img src={video.author.avatar.startsWith('http') ? video.author.avatar : `https://mutube-dreamshelter.amvera.io${video.author.avatar}`} alt="" className="mini-avatar" />
                 ) : (
                   <div className="avatar-placeholder">{video.author?.username?.[0].toUpperCase()}</div>
                 )}
@@ -179,7 +173,6 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
     .then(res => {
       setIsLiked(res.data.liked);
       setLikesCount(res.data.total_likes);
-      
       if (typeof updateVideoLikes === 'function') {
         updateVideoLikes(video.id, res.data.liked, res.data.total_likes);
       }
@@ -204,6 +197,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
     e.preventDefault();
     if (!token) return alert("Войдите, чтобы оставить комментарий");
     if (!newComment.trim()) return;
+    
     axios.post(`https://mutube-dreamshelter.amvera.io/api/videos/${id}/comments/`, 
       { text: newComment },
       { headers: { 'Authorization': `Token ${token}` } }
@@ -218,36 +212,16 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
 
   return (
     <div className="video-detail-page">
-      <Header 
-        username={username} 
-        onLogout={onLogout} 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery}
-        userAvatar={userAvatar} 
-      />
-      
+      <Header username={username} onLogout={onLogout} searchQuery={searchQuery} setSearchQuery={setSearchQuery} userAvatar={userAvatar} />
       <div className="video-page-container">
         <div className="video-main-content">
           <div className="video-player-main-container">
             <div className="video-custom-player">
-              <video 
-                ref={videoRef} 
-                className="main-video-element" 
-                src={video.video_file} 
-                onClick={togglePlay}
-              />
+              <video ref={videoRef} className="main-video-element" src={video.video_file.startsWith('http') ? video.video_file : `https://mutube-dreamshelter.amvera.io${video.video_file}`} onClick={togglePlay} />
               <div className="custom-player-controls">
-                <div className="controls-left-section">
-                  <button className="player-btn" onClick={togglePlay}>
-                    {isPlaying ? "⏸" : "▶"}
-                  </button>
-                  <button className="player-btn" onClick={toggleMute}>
-                    {isMuted ? "🔇" : "🔊"}
-                  </button>
-                </div>
-                <div className="controls-right-section">
-                  <button className="player-btn" onClick={handleFullScreen}>⛶</button>
-                </div>
+                <button className="player-btn" onClick={togglePlay}>{isPlaying ? "⏸" : "▶"}</button>
+                <button className="player-btn" onClick={toggleMute}>{isMuted ? "🔇" : "🔊"}</button>
+                <button className="player-btn" onClick={handleFullScreen}>⛶</button>
               </div>
             </div>
           </div>
@@ -268,26 +242,10 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
                   <span className="subs-count">{subsCount} подписчиков</span>
                 </div>
               </Link>
-              
               <div className="video-actions">
-                <button 
-                  onClick={handleSubscribe} 
-                  className={`btn-subscribe ${isSubscribed ? 'subscribed' : ''}`}
-                >
-                  {isSubscribed ? 'Вы подписаны' : 'Подписаться'}
-                </button>
-                
-                <button 
-                  onClick={handleLike} 
-                  className={`like-button ${isLiked ? 'active' : ''}`}
-                >
-                  <span className="like-icon-svg-container">
-                    {isLiked ? (
-                      <img src={liveRedHeart} className="like-icon-svg" alt="Liked" />
-                    ) : (
-                      <img src={liveWhiteHeart} className="like-icon-svg" alt="Not liked" />
-                    )}
-                  </span>
+                <button onClick={handleSubscribe} className={`btn-subscribe ${isSubscribed ? 'subscribed' : ''}`}>{isSubscribed ? 'Вы подписаны' : 'Подписаться'}</button>
+                <button onClick={handleLike} className={`like-button ${isLiked ? 'active' : ''}`}>
+                  <img src={isLiked ? liveRedHeart : liveWhiteHeart} className="like-icon-svg" alt="" />
                   <span className="like-count">{likesCount}</span>
                 </button>
               </div>
@@ -295,79 +253,28 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
           </div>
 
           <div className="video-description-box">
-            <p className="description-text">
-              {video.description || "У этого видео нет описания."}
-            </p>
+            <p className="description-text">{video.description || "У этого видео нет описания."}</p>
           </div>
 
           <div className="comments-section">
-            <div className="comments-header-row">
-              <h3>{comments.length} комментариев</h3>
-            </div>
-
+            <h3>{comments.length} комментариев</h3>
             {username ? (
               <form className="comment-form" onSubmit={handleCommentSubmit}>
-                <div className="comment-input-container">
-                  <input 
-                    type="text" 
-                    className="comment-input-field" 
-                    placeholder="Введите комментарий..." 
-                    value={newComment} 
-                    onChange={(e) => setNewComment(e.target.value)}
-                  />
-                  <div className="comment-form-actions">
-                    <button type="button" className="btn-comment-cancel" onClick={() => setNewComment("")}>
-                      Отмена
-                    </button>
-                    <button type="submit" className="btn-comment-submit" disabled={!newComment.trim()}>
-                      Отправить
-                    </button>
-                  </div>
-                </div>
+                <input type="text" className="comment-input-field" placeholder="Введите комментарий..." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
+                <button type="submit" className="btn-comment-submit" disabled={!newComment.trim()}>Отправить</button>
               </form>
-            ) : (
-              <p className="login-prompt">Войдите, чтобы оставлять комментарии</p>
-            )}
+            ) : <p className="login-prompt">Войдите, чтобы оставлять комментарии</p>}
 
             <div className="comments-list">
               {comments.map(c => (
                 <div key={c.id} className="comment-item">
-                  <div className="comment-avatar-wrapper">
-                    {c.author?.avatar ? (
-                      <img src={c.author.avatar} alt="" className="avatar-circle-xs" />
-                    ) : (
-                      <div className="avatar-circle-xs">{c.author?.username?.[0].toUpperCase()}</div>
-                    )}
-                  </div>
-                  <div className="comment-content">
-                    <div className="comment-author-meta">
-                      <span className="comment-author">@{c.author?.username}</span>
-                      <span className="comment-date">недавно</span>
-                    </div>
-                    <p className="comment-text">{c.text}</p>
-                  </div>
+                  <span className="comment-author">@{c.author?.username}: </span>
+                  <span className="comment-text">{c.text}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        <aside className="video-sidebar">
-          <h3 className="sidebar-title">Следующее</h3>
-          <div className="recommendations-list">
-            {recommendations.map(rec => (
-              <Link to={`/video/${rec.id}`} key={rec.id} className="rec-card">
-                <div className="rec-thumb">
-                  <img src={rec.thumbnail} alt={rec.title} />
-                </div>
-                <div className="rec-info">
-                  <h4 className="rec-title">{rec.title}</h4>
-                  <p className="rec-author">{rec.author?.username}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </aside>
       </div>
     </div>
   );
@@ -376,13 +283,11 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
 // --- СТРАНИЦА: ПРОФИЛЬ ---
 function Profile({ token, currentUsername, videos, refreshVideos, onLogout, searchQuery, setSearchQuery, userAvatar }) {
   const { userId } = useParams(); 
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [videoFile, setVideoFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
-  const [message, setMessage] = useState('');
 
   const effectiveUserId = userId ? parseInt(userId) : videos.find(v => v.author?.username === currentUsername)?.author?.id;
   const profileOwnerVideo = videos.find(v => v.author?.id === effectiveUserId);
@@ -395,32 +300,25 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
   useEffect(() => {
     const myVideo = videos.find(v => v.author?.username === (userId ? profileOwnerName : currentUsername));
     if (myVideo?.author?.banner) {
-      setBanner(myVideo.author.banner);
+      setBanner(myVideo.author.banner.startsWith('http') ? myVideo.author.banner : `https://mutube-dreamshelter.amvera.io${myVideo.author.banner}`);
     }
   }, [videos, userId, profileOwnerName, currentUsername]);
 
   const handleBannerUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append('banner', file);
 
     try {
       const response = await axios.patch('https://mutube-dreamshelter.amvera.io/api/user/profile/', formData, {
-        headers: { 
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Token ${token}` 
-        }
+        headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Token ${token}` }
       });
-      
       if (response.data.banner_url) {
         setBanner(response.data.banner_url);
         refreshVideos();
       }
-    } catch (err) {
-      console.error("Ошибка:", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleAvatarUpload = (e) => {
@@ -428,9 +326,11 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     if (!file) return;
     const formData = new FormData();
     formData.append('avatar', file);
-    axios.post('https://mutube-dreamshelter.amvera.io/api/videos/', formData, {
+    
+    // ИСПРАВЛЕНО: Теперь бьет в эндпоинт аватара, а не видео
+    axios.post('https://mutube-dreamshelter.amvera.io/api/user/avatar/', formData, {
       headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'multipart/form-data' }
-    }).then(() => { refreshVideos(); setMessage("✅ Аватар обновлен!"); });
+    }).then(() => { refreshVideos(); alert("Аватар обновлен!"); });
   };
 
   const handleUpload = (e) => {
@@ -442,140 +342,47 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     formData.append('thumbnail', thumbnailFile);
 
     axios.post('https://mutube-dreamshelter.amvera.io/api/videos/', formData, {
-      headers: { 
-        'Authorization': `Token ${token}`, 
-        'Content-Type': 'multipart/form-data' 
-      }
+      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'multipart/form-data' }
     }).then(() => { 
       refreshVideos(); 
       setIsModalOpen(false); 
-    }).catch(err => {
-      console.error("Ошибка при создании видео:", err.response.data);
-    });
+    }).catch(err => console.error("Ошибка при создании видео:", err));
   };
 
   return (
     <div className="app-layout">
-      <Header 
-        username={currentUsername} 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
-        onLogout={onLogout} 
-        userAvatar={userAvatar} /* ИСПРАВЛЕНО: Теперь берет userAvatar из пропсов Profile */
-      />
-      
+      <Header username={currentUsername} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onLogout={onLogout} userAvatar={userAvatar} />
       <div className="profile-container">
-        <div className="profile-main-section">
-          <div className="profile-user-core">
-            <div className="avatar-wrapper">
-              <div className="avatar-circle">
-                {profileOwnerVideo?.author?.avatar ? (
-                  <img src={profileOwnerVideo.author.avatar} alt="" className="profile-avatar-img" />
-                ) : (
-                  profileOwnerName?.[0].toUpperCase()
-                )}
-              </div>
-              {isMyOwnProfile && (
-                <label className="avatar-edit-label">
-                  <span>📷</span>
-                  <input type="file" onChange={handleAvatarUpload} hidden />
-                </label>
-              )}
-            </div>
-
-            <div className="profile-text-info">
-              <h1 className="profile-name">{profileOwnerName}</h1>
-              <p className="profile-stats">
-                @{profileOwnerName?.toLowerCase().replace(/\s+/g, '')} • {displayVideos.length} видео
-              </p>
-              {isMyOwnProfile && (
-                <button onClick={() => setIsModalOpen(true)} className="btn-upload">
-                  Создать видео
-                </button>
-              )}
-            </div>
+        <div className="profile-user-core">
+          <div className="avatar-circle">
+            {profileOwnerVideo?.author?.avatar ? (
+              <img src={profileOwnerVideo.author.avatar.startsWith('http') ? profileOwnerVideo.author.avatar : `https://mutube-dreamshelter.amvera.io${profileOwnerVideo.author.avatar}`} alt="" className="profile-avatar-img" />
+            ) : profileOwnerName?.[0].toUpperCase()}
           </div>
-
-          <div className="profile-banner-aside">
-            <div 
-              className="profile-banner-preview"
-              style={{ 
-                backgroundImage: banner ? `url(${banner})` : 'none',
-                backgroundColor: !banner ? '#222' : 'transparent' 
-              }}
-            >
-              {isMyOwnProfile && (
-                <label className="banner-upload-small">
-                  <span>Изменить фон</span>
-                  <input type="file" onChange={handleBannerUpload} hidden /> 
-                </label>
-              )}
-            </div>
-          </div>
+          {isMyOwnProfile && <input type="file" onChange={handleAvatarUpload} />}
+          <h1>{profileOwnerName}</h1>
+          {isMyOwnProfile && <button onClick={() => setIsModalOpen(true)} className="btn-upload">Создать видео</button>}
         </div>
 
-        <hr className="profile-line" />
-
-        <div className="video-section">
-          <h2 className="section-title">Видео</h2>
-          <div className="video-grid">
-            {displayVideos.length > 0 ? (
-              displayVideos.map(v => (
-                <Link to={`/video/${v.id}`} key={v.id} className="video-card">
-                  <div className="thumbnail-wrapper">
-                    <img src={v.thumbnail} alt="" />
-                  </div>
-                  <div className="video-card-details">
-                    <h3 className="video-title">{v.title}</h3>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <p className="no-content-text">На этом канале пока нет видео.</p>
-            )}
-          </div>
+        <div className="video-grid">
+          {displayVideos.map(v => (
+            <Link to={`/video/${v.id}`} key={v.id} className="video-card">
+              <img src={v.thumbnail.startsWith('http') ? v.thumbnail : `https://mutube-dreamshelter.amvera.io${v.thumbnail}`} alt="" />
+              <h3>{v.title}</h3>
+            </Link>
+          ))}
         </div>
       </div>
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h2>Добавить новое видео</h2>
             <form onSubmit={handleUpload} className="upload-form">
-              <input 
-                type="text" 
-                placeholder="Название видео" 
-                value={title} 
-                onChange={e => setTitle(e.target.value)} 
-                required 
-              />
-              <textarea 
-                placeholder="Описание" 
-                value={description} 
-                onChange={e => setDescription(e.target.value)} 
-              />
-              <label>Файл видео:</label>
-              <input 
-                type="file" 
-                accept="video/*" 
-                onChange={e => setVideoFile(e.target.files[0])} 
-                required 
-              />
-              <label>Превью (Картинка):</label>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={e => setThumbnailFile(e.target.files[0])} 
-                required 
-              />
-              <div className="modal-actions">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="btn-cancel">
-                  Отмена
-                </button>
-                <button type="submit" className="btn-submit-video">
-                  Загрузить
-                </button>
-              </div>
+              <input type="text" placeholder="Название" value={title} onChange={e => setTitle(e.target.value)} required />
+              <textarea placeholder="Описание" value={description} onChange={e => setDescription(e.target.value)} />
+              <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files[0])} required />
+              <input type="file" accept="image/*" onChange={e => setThumbnailFile(e.target.files[0])} required />
+              <button type="submit">Загрузить</button>
             </form>
           </div>
         </div>
@@ -603,23 +410,17 @@ function AuthPage({ type, setToken, setUsername }) {
         } else {
           navigate('/login');
         }
-      });
+      }).catch(err => console.error("Ошибка авторизации", err));
   };
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        <h2>{type === 'register' ? 'Регистрация' : 'Вход'}</h2>
-        <form onSubmit={handleSubmit} className="auth-form">
-          <input type="text" placeholder="Логин" required onChange={e => setFormData({...formData, username: e.target.value})} />
-          {type === 'register' && <input type="email" placeholder="Email" required onChange={e => setFormData({...formData, email: e.target.value})} />}
-          <input type="password" placeholder="Пароль" required onChange={e => setFormData({...formData, password: e.target.value})} />
-          <button type="submit" className="btn-primary">{type === 'register' ? 'Создать аккаунт' : 'Войти'}</button>
-        </form>
-        <Link to={type === 'login' ? "/register" : "/login"} style={{marginTop: '15px', display: 'block', color: '#3ea6ff'}}>
-          {type === 'login' ? "Нет аккаунта? Регистрация" : "Уже есть аккаунт? Вход"}
-        </Link>
-      </div>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <input type="text" placeholder="Логин" required onChange={e => setFormData({...formData, username: e.target.value})} />
+        {type === 'register' && <input type="email" placeholder="Email" required onChange={e => setFormData({...formData, email: e.target.value})} />}
+        <input type="password" placeholder="Пароль" required onChange={e => setFormData({...formData, password: e.target.value})} />
+        <button type="submit">{type === 'register' ? 'Создать аккаунт' : 'Войти'}</button>
+      </form>
     </div>
   );
 }
@@ -632,7 +433,6 @@ export default function App() {
   const [username, setUsername] = useState(localStorage.getItem('username'));
 
   const fetchVideos = () => {
-    // Если токена нет, не отправляем заголовок Authorization
     const config = token ? { headers: { 'Authorization': `Token ${token}` } } : {};
     axios.get('https://mutube-dreamshelter.amvera.io/api/videos/', config)
       .then(res => setVideos(res.data))
@@ -655,74 +455,10 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* ГЛАВНАЯ СТРАНИЦА */}
-        <Route 
-          path="/" 
-          element={
-            <VideoList 
-              videos={videos} 
-              searchQuery={searchQuery} 
-              setSearchQuery={setSearchQuery} 
-              username={username} 
-              onLogout={logout} 
-              userAvatar={currentUserAvatar} 
-            />
-          } 
-        />
-        
-        {/* ДЕТАЛЬНАЯ СТРАНИЦА ВИДЕО */}
-        <Route 
-          path="/video/:id" 
-          element={
-            <VideoDetail 
-              videos={videos} 
-              updateVideoLikes={updateVideoLikes} 
-              username={username} 
-              token={token} 
-              onLogout={logout} 
-              updateAuthorStatus={updateAuthorStatus} 
-              searchQuery={searchQuery} 
-              setSearchQuery={setSearchQuery} 
-              userAvatar={currentUserAvatar} 
-            />
-          } 
-        />
-        
-        {/* СТРАНИЦА ДРУГОГО ПРОФИЛЯ */}
-        <Route 
-          path="/profile/:userId" 
-          element={
-            <Profile 
-              token={token} 
-              currentUsername={username} 
-              videos={videos} 
-              refreshVideos={fetchVideos} 
-              onLogout={logout} 
-              searchQuery={searchQuery} 
-              setSearchQuery={setSearchQuery} 
-              userAvatar={currentUserAvatar} 
-            />
-          } 
-        />
-        
-        {/* СТРАНИЦА СВОЕГО ПРОФИЛЯ */}
-        <Route 
-          path="/profile" 
-          element={
-            <Profile 
-              token={token} 
-              currentUsername={username} 
-              videos={videos} 
-              refreshVideos={fetchVideos} 
-              onLogout={logout} 
-              searchQuery={searchQuery} 
-              setSearchQuery={setSearchQuery} 
-              userAvatar={currentUserAvatar} 
-            />
-          } 
-        />
-        
-        {/* АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ */}
+        <Route path="/" element={<VideoList videos={videos} searchQuery={searchQuery} setSearchQuery={setSearchQuery} username={username} onLogout={logout} userAvatar={currentUserAvatar} />} />
+        <Route path="/video/:id" element={<VideoDetail videos={videos} updateVideoLikes={updateVideoLikes} username={username} token={token} onLogout={logout} updateAuthorStatus={updateAuthorStatus} searchQuery={searchQuery} setSearchQuery={setSearchQuery} userAvatar={currentUserAvatar} />} />
+        <Route path="/profile/:userId" element={<Profile token={token} currentUsername={username} videos={videos} refreshVideos={fetchVideos} onLogout={logout} searchQuery={searchQuery} setSearchQuery={setSearchQuery} userAvatar={currentUserAvatar} />} />
+        <Route path="/profile" element={<Profile token={token} currentUsername={username} videos={videos} refreshVideos={fetchVideos} onLogout={logout} searchQuery={searchQuery} setSearchQuery={setSearchQuery} userAvatar={currentUserAvatar} />} />
         <Route path="/register" element={<AuthPage type="register" />} />
         <Route path="/login" element={<AuthPage type="login" setToken={setToken} setUsername={setUsername} />} />
       </Routes>
