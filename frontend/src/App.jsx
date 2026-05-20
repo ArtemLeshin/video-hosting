@@ -632,8 +632,11 @@ export default function App() {
   const [username, setUsername] = useState(localStorage.getItem('username'));
 
   const fetchVideos = () => {
+    // Если токена нет, не отправляем заголовок Authorization
     const config = token ? { headers: { 'Authorization': `Token ${token}` } } : {};
-    axios.get('https://mutube-dreamshelter.amvera.io/api/videos/', config).then(res => setVideos(res.data));
+    axios.get('https://mutube-dreamshelter.amvera.io/api/videos/', config)
+      .then(res => setVideos(res.data))
+      .catch(err => console.error("Ошибка загрузки видео:", err));
   };
 
   useEffect(() => { fetchVideos(); }, [token]);
