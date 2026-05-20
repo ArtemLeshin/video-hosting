@@ -2,15 +2,13 @@ from django.contrib.auth.models import User
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication 
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from rest_framework.exceptions import NotAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Video, Comment, Profile
 from .serializers import VideoSerializer, CommentSerializer
-
-from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
 
 # --- ЛОГИКА ЛАЙКОВ ---
 @api_view(['POST'])
@@ -37,8 +35,17 @@ def toggle_like(request, pk):
 class VideoListCreateView(generics.ListCreateAPIView):
     queryset = Video.objects.all().order_by('-created_at') 
     serializer_class = VideoSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    # Изменяем поведение: если это GET запрос, мы ВООБЩЕ игнорируем сломанные токены авторизации
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            return []
+        return [TokenAuthentication()]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -46,14 +53,23 @@ class VideoListCreateView(generics.ListCreateAPIView):
         return context
 
     def perform_create(self, serializer):
-            # Гарантируем, что у пользователя есть профиль перед созданием видео
-            Profile.objects.get_or_create(user=self.request.user)
-            serializer.save(author=self.request.user)
+        Profile.objects.get_or_create(user=self.request.user)
+        serializer.save(author=self.request.user)
 
 class VideoDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
-    permission_classes = [permissions.AllowAny]
+    
+    # Для деталей видео (GET) делаем то же самое, чтобы не падать на 401
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            return []
+        return [TokenAuthentication()]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -75,8 +91,16 @@ def update_avatar(request):
 # --- КОММЕНТАРИИ ---
 class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            return []
+        return [TokenAuthentication()]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         return Comment.objects.filter(video_id=self.kwargs['video_id']).order_by('-created_at')
@@ -84,7 +108,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, video_id=self.kwargs['video_id'])
 
-# --- РЕГИСТРАЦИЯ (Сначала Сериализатор, потом View) ---
+# --- РЕГИСТРАЦИЯ ---
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:
@@ -104,9 +128,10 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = RegisterSerializer
 
-@api_view(['POST']) # Обязательно: превращает функцию в API
-@authentication_classes([TokenAuthentication]) # Чтобы понимал 'Token ...'
-@permission_classes([IsAuthenticated]) # Чтобы пускал только логированных
+# --- ПОДПИСКИ ---
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def toggle_subscribe(request, user_id):
     try:
         target_user = User.objects.get(pk=user_id)
@@ -129,19 +154,19 @@ def toggle_subscribe(request, user_id):
     except User.DoesNotExist:
         return Response({"error": "Пользователь не найден"}, status=404)
 
+# --- ПРОФИЛЬ ---
 class ProfileUpdateView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
     def patch(self, request):
-        # Ищем профиль или создаем, если его вдруг нет
         profile, created = Profile.objects.get_or_create(user=request.user)
         
         if 'banner' in request.FILES:
             profile.banner = request.FILES['banner']
             profile.save()
             
-            # Возвращаем полный путь к картинке для фронтенда
             return Response({
                 "banner_url": request.build_absolute_uri(profile.banner.url)
             }, status=status.HTTP_200_OK)
