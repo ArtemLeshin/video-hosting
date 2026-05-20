@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponse # Добавили импорт для index
+from django.http import HttpResponse
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.views import APIView
@@ -11,7 +11,19 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Video, Comment, Profile
 from .serializers import VideoSerializer, CommentSerializer
 
-# --- ТО, ЧТО МЫ ПОТЕРЯЛИ: ГЛАВНАЯ СТРАНИЦА БЭКЕНДА ---
+# --- КАСТЕНАЯ АУТЕНТИФИКАЦИЯ ДЛЯ КОРРЕКТНОЙ РАБОТЫ ГОСТЕЙ ---
+class SafeTokenAuthentication(TokenAuthentication):
+    """
+    Если токен не передан или он сломан, мы не выбрасываем 401/403 ошибку,
+    а просто пропускаем пользователя как анонима.
+    """
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except Exception:
+            return None # Возвращаем None, чтобы DRF считал юзера анонимным, а не выдавал ошибку
+
+# --- ГЛАВНАЯ СТРАНИЦА БЭКЕНДА ---
 def index(request):
     return HttpResponse("Backend is running perfectly!")
 
@@ -40,7 +52,8 @@ def toggle_like(request, pk):
 class VideoListCreateView(generics.ListCreateAPIView):
     queryset = Video.objects.all().order_by('-created_at') 
     serializer_class = VideoSerializer
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    # Используем наш безопасный класс аутентификации
+    authentication_classes = [SafeTokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_context(self):
@@ -55,7 +68,7 @@ class VideoListCreateView(generics.ListCreateAPIView):
 class VideoDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [SafeTokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_context(self):
@@ -78,7 +91,7 @@ def update_avatar(request):
 # --- КОММЕНТАРИИ ---
 class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [SafeTokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
