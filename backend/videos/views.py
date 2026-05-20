@@ -147,6 +147,7 @@ def toggle_subscribe(request, user_id):
         return Response({"error": "Пользователь не найден"}, status=404)
 
 # --- ПРОФИЛЬ ---
+# --- ПРОФИЛЬ ---
 class ProfileUpdateView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -155,12 +156,20 @@ class ProfileUpdateView(APIView):
     def patch(self, request):
         profile, created = Profile.objects.get_or_create(user=request.user)
         
+        # Если прилетел баннер — сохраняем
         if 'banner' in request.FILES:
             profile.banner = request.FILES['banner']
             profile.save()
-            
             return Response({
                 "banner_url": request.build_absolute_uri(profile.banner.url)
+            }, status=status.HTTP_200_OK)
+            
+        # Если прилетел аватар — сохраняем сюда же!
+        if 'avatar' in request.FILES:
+            profile.avatar = request.FILES['avatar']
+            profile.save()
+            return Response({
+                "avatar_url": request.build_absolute_uri(profile.avatar.url)
             }, status=status.HTTP_200_OK)
             
         return Response({"error": "Файл не получен"}, status=status.HTTP_400_BAD_REQUEST)

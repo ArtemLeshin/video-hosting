@@ -377,6 +377,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
 
 // --- СТРАНИЦА: ПРОФИЛЬ ---
 // --- СТРАНИЦА: ПРОФИЛЬ ---
+// --- СТРАНИЦА: ПРОФИЛЬ ---
 function Profile({ token, currentUsername, videos, refreshVideos, onLogout, searchQuery, setSearchQuery, userAvatar }) {
   const { userId } = useParams(); 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -429,23 +430,21 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     if (!file) return;
     
     const formData = new FormData();
-    // Бэкенд ждет строго ключ 'avatar'
     formData.append('avatar', file); 
     
-    // Бэкенд ждет POST-запрос на специальный эндпоинт для аватара
-    axios.post('https://mutube-dreamshelter.amvera.io/api/user/avatar/', formData, {
+    // Отправляем PATCH-запрос на тот же рабочий эндпоинт, что и баннер
+    axios.patch('https://mutube-dreamshelter.amvera.io/api/user/profile/', formData, {
       headers: { 
         'Authorization': `Token ${token}`, 
         'Content-Type': 'multipart/form-data' 
       }
     })
     .then(() => { 
-      // При успешном ответе обновляем видео, чтобы подтянулась новая картинка
       refreshVideos(); 
     })
     .catch(err => {
       console.error("Ошибка при сохранении аватара:", err.response?.data || err);
-      alert("Не удалось сохранить аватар. Проверь консоль.");
+      alert("Не удалось сохранить аватар. Проверь, обновился ли бэкенд в Amvera.");
     });
   };
 
@@ -495,8 +494,8 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
                     alt="" 
                     className="profile-avatar-img" 
                     onError={(e) => {
-                      e.target.style.display = 'none'; // Скрываем битый URL
-                      e.target.closest('.avatar-circle').innerText = profileOwnerName?.[0].toUpperCase(); // Ставим букву
+                      e.target.style.display = 'none';
+                      e.target.closest('.avatar-circle').innerText = profileOwnerName?.[0].toUpperCase(); 
                     }}
                   />
                 ) : (
