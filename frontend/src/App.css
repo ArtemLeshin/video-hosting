@@ -1,0 +1,1064 @@
+/* --- 1. ПЕРЕМЕННЫЕ И ОБЩИЕ СТИЛИ --- */
+:root {
+  --bg: #0f0f0f;
+  --card-bg: #1e1e1e;
+  --border: #333;
+  --text-main: #f1f1f1;
+  --text-dim: #aaa;
+  --accent: #3ea6ff;
+  --error: #ff4e4e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  margin: 0;
+  font-family: Roboto, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* --- 2. ШАПКА (HEADER) --- */
+.header {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+  padding: 0 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
+}
+
+.logo-img { height: 24px !important; width: auto; }
+.logo-text { font-size: 1.2rem; font-weight: bold; }
+
+.search-input {
+  width: 400px;
+  height: 36px;
+  background: #121212;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0 15px;
+  color: white;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.search-input:focus { border-color: var(--accent); }
+
+.user-section, .user-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* --- 3. ГЛАВНАЯ СТРАНИЦА И СЕТКА --- */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+.video-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+.thumbnail-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-thumbnail, .thumbnail-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.video-card:hover .video-thumbnail { transform: scale(1.03); }
+
+/* Кнопка в углу превью */
+.full-screen-btn-preview {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: none;
+  z-index: 5;
+}
+
+.video-card-content {
+  display: flex;
+  margin-top: 12px;
+  gap: 12px;
+}
+
+.mini-avatar, .avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  background-color: var(--accent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.video-title-main {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.video-author-name {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* --- 4. СТРАНИЦА ВИДЕО (ПЛЕЕР И САЙДБАР) --- */
+.video-page-container {
+  display: flex;
+  gap: 24px;
+  padding: 24px 60px;
+  max-width: 1700px;
+  margin: 0 auto;
+}
+
+.video-main-content { flex: 3; min-width: 0; }
+.video-sidebar { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+/* Кастомный плеер */
+.video-player-main-container {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+
+.video-custom-player { position: relative; width: 100%; aspect-ratio: 16/9; }
+.main-video-element { width: 100%; height: 100%; object-fit: contain; }
+
+.custom-player-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.video-custom-player:hover .custom-player-controls { opacity: 1; }
+
+.controls-left-section, .controls-right-section {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Чтобы иконки справа НЕ СКЛЕИВАЛИСЬ */
+}
+
+.player-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* Автор под видео */
+.video-author-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0;
+}
+
+.author-info-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; }
+.author-avatar { width: 40px; height: 40px; border-radius: 50%; background: #333; overflow: hidden; }
+
+.btn-subscribe {
+  background: white;
+  color: black;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Рекомендации в сайдбаре */
+.rec-card { display: flex; gap: 12px; text-decoration: none; color: white; }
+.rec-thumb { width: 168px; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.rec-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rec-title { font-size: 14px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* --- 5. КОММЕНТАРИИ (ШИРОКИЕ И ПРАВИЛЬНЫЕ) --- */
+.comments-section { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 20px; }
+
+.comment-form { display: flex; gap: 16px; margin-bottom: 32px; align-items: flex-start; }
+
+.comment-input-container {
+  flex: 1; /* Растягивает на всю ширину */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment-input-field {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: white;
+  padding: 10px 0;
+  font-size: 16px;
+  outline: none;
+}
+
+.comment-input-field:focus { border-bottom: 2px solid white; }
+
+.comment-form-actions {
+  display: flex;
+  justify-content: flex-end; /* Кнопки прижаты ВПРАВО */
+  gap: 12px;
+}
+
+.btn-submit {
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-submit:disabled { background: #333; color: #717171; }
+
+.comment-item { display: flex; gap: 12px; margin-bottom: 20px; }
+.comment-author { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+.comment-text { font-size: 14px; line-height: 1.4; color: #eee; }
+
+/* --- 6. АВТОРИЗАЦИЯ (СТРОГО В КОЛОНКУ) --- */
+/* Контейнер всей страницы авторизации */
+/* Контейнер всей страницы авторизации */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #0f0f0f; /* Глубокий темный фон */
+  font-family: sans-serif;
+}
+
+/* Карточка авторизации */
+.auth-card {
+  background-color: #1f1f1f;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid #2f2f2f;
+}
+
+.auth-card h2 {
+  color: #fff;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Навешиваем флекс на форму, чтобы элементы стояли ровно */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Расстояние между инпутами и кнопкой */
+}
+
+/* Стилизация полей ввода */
+.auth-form input {
+  background-color: #2d2d2d;
+  border: 1px solid #3f3f3f;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.auth-form input:focus {
+  border-color: #3ea6ff; /* Подсветка при клике в цвет YouTube */
+  background-color: #3d3d3d;
+}
+
+/* НАША КРАСИВАЯ КНОПКА ВОЙТИ */
+.auth-form .btn-primary {
+  background-color: #3ea6ff; /* Яркий синий акцент */
+  color: #0f0f0f; /* Темный текст для контраста */
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  margin-top: 8px;
+}
+
+/* Эффект при наведении курсора */
+.auth-form .btn-primary:hover {
+  background-color: #65b8ff; /* Чуть светлее при наведении */
+  box-shadow: 0 0 12px rgba(62, 166, 255, 0.4); /* Мягкое неоновое свечение */
+}
+
+/* Эффект при клике (нажатии) */
+.auth-form .btn-primary:active {
+  transform: scale(0.98); /* Кнопка слегка прожимается внутрь */
+}
+
+/* Ссылка под кнопкой ("Нет аккаунта?") */
+.auth-card a {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-card a:hover {
+  color: #65b8ff !important;
+  text-decoration: underline;
+}
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column !important;
+  gap: 24px;
+  text-align: center;
+}
+
+.auth-form { display: flex; flex-direction: column !important; gap: 16px; }
+.auth-form input { padding: 12px; background: #000; border: 1px solid #444; border-radius: 8px; color: white; outline: none; }
+
+/* --- 7. ПРОФИЛЬ --- */
+.profile-container { padding: 40px 10%; }
+.profile-header-card { display: flex; align-items: center; gap: 30px; margin-bottom: 40px; }
+.avatar-circle {
+  width: 120px;                  /* Фиксированная ширина */
+  height: 120px;                 /* Фиксированная высота */
+  border-radius: 50%;            /* Идеальный круг */
+  overflow: hidden;              /* Обрезаем всё, что вылезает за круг */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #444;        /* Цвет заглушки с первой буквой */
+  color: #fff;
+  font-size: 48px;
+  font-weight: bold;
+}
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;             /* Картинка заполняет круг без деформации */
+  display: block;
+}
+
+/* --- 8. МОДАЛЬНОЕ ОКНО (ЗАГРУЗКА) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: #1e1e1e;
+  padding: 32px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.upload-form { display: flex; flex-direction: column; gap: 20px; }
+.upload-form input[type="text"], .upload-form textarea {
+  background: #0b0e14;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  width: 100%;
+}
+
+.close-modal {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: none; border: none; color: white; font-size: 24px; cursor: pointer;
+}
+.player-btn {
+  width: 40px; /* Фиксированная ширина, чтобы кнопки не двигались при смене иконок */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.player-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Эффект для зачеркнутого звука, если хочешь через спец. символ */
+.player-btn {
+  font-family: "Segoe UI Symbol", "Apple Color Emoji", sans-serif;
+}
+
+/* --- СТИЛИ КОММЕНТАРИЕВ (БЕЗ ХАОСА) --- */
+.comments-section {
+  margin-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.comments-header h3 { margin: 0; font-size: 20px; font-weight: 500; }
+.comments-info-dim { color: #aaa; font-size: 14px; }
+
+/* Форма добавления комментария */
+.comment-form {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 40px;
+  align-items: flex-start;
+}
+
+.comment-input-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment-input-field {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px 0;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.comment-input-field:focus {
+  border-bottom: 2px solid white;
+}
+
+/* Действия формы */
+.comment-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-comment-cancel {
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 18px;
+}
+
+.btn-comment-cancel:hover { background: rgba(255, 255, 255, 0.1); }
+
+.btn-comment-submit {
+  background: #3ea6ff; /* Синий YouTube */
+  color: black;
+  font-weight: bold;
+  border-radius: 18px;
+  border: none;
+  padding: 8px 18px;
+  cursor: pointer;
+}
+
+.btn-comment-submit:disabled {
+  background: #333;
+  color: #717171;
+  cursor: not-allowed;
+}
+
+/* Список комментариев */
+.comment-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+}
+
+.comment-author-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.comment-author { font-weight: bold; font-size: 14px; color: white; }
+.comment-date { font-size: 12px; color: #aaa; }
+.comment-text { font-size: 14px; line-height: 1.4; color: #eee; margin: 0; }
+
+/* Аватарки */
+.avatar-circle-xs {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #444;
+  display: flex; justify-content: center; align-items: center;
+  color: white; font-weight: bold; font-size: 14px;
+}
+/* --- КНОПКА ВЫХОДА В ШАПКЕ --- */
+.logout-btn {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: white;
+}
+
+/* --- КНОПКА ЛАЙКА (СТИЛЬ ПИЛЮЛИ) --- */
+.btn-like {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #272727; /* Темно-серый, как на YouTube */
+  color: white;
+  border: none;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-like:hover {
+  background: #3f3f3f;
+}
+
+.btn-like.active {
+  background: #3f3f3f;
+}
+
+.btn-like.active span:first-child {
+  color: #ff4e4e; /* Красное сердечко при лайке */
+}
+
+/* Разделитель внутри кнопки, если захочешь добавить дизлайк позже */
+.btn-like span:last-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  padding-left: 8px;
+  margin-left: 4px;
+}
+/* Контейнер для кнопок под видео */
+.video-actions {
+  display: flex;       /* Выстраивает кнопки в одну линию */
+  align-items: center; /* Центрирует их по вертикали */
+  gap: 12px;           /* Расстояние между кнопкой подписки и лайком */
+}
+
+/* Кнопка подписки (черно-белая) */
+.btn-subscribe {
+  background-color: #f1f1f1;
+  color: #0f0f0f;
+  border: none;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap; /* Чтобы текст не переносился */
+}
+
+.btn-subscribe.subscribed {
+  background-color: #333;
+  color: #aaa;
+}
+
+/* Кнопка лайка (пилюля) */
+.btn-like {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #272727;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-like:hover {
+  background: #3f3f3f;
+}
+/* Шапка профиля */
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 40px 0;
+}
+
+.avatar-wrapper {
+  position: relative;
+}
+
+.avatar-circle {
+  width: 120px;
+  height: 120px;
+  background: #3ea6ff;
+  border-radius: 50%;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-edit-label {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #272727;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid #333;
+}
+
+.profile-stats {
+  color: #aaa;
+  font-size: 14px;
+  margin: 4px 0 16px;
+}
+
+.profile-line {
+  border: none;
+  border-top: 1px solid #333;
+  margin-bottom: 24px;
+}
+
+/* Кнопки */
+.btn-upload {
+  background: #f1f1f1;
+  color: #0f0f0f;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Модалка */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #212121;
+  width: 500px;
+  padding: 24px;
+  border-radius: 12px;
+  color: white;
+}
+
+.upload-form input, .upload-form textarea {
+  width: 100%;
+  background: #121212;
+  border: 1px solid #333;
+  color: white;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.file-label {
+  display: block;
+  padding: 10px;
+  border: 1px dashed #444;
+  margin-bottom: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+/* Основная секция профиля */
+.profile-main-section {
+  display: flex;
+  justify-content: space-between; /* Разносим стороны */
+  align-items: center;
+  gap: 40px;
+  padding: 40px 0;
+}
+
+.profile-user-core {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0; /* Чтобы инфо не сжималось */
+}
+
+/* Правая часть с баннером */
+.profile-banner-aside {
+  max-width: 400px; /* Ограничим ширину, чтобы не был слишком длинным */
+}
+
+.profile-banner-preview {
+  width: 100%;
+  height: 150px;
+  border-radius: 12px;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid #333;
+}
+
+.banner-upload-small {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 6px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Убираем старую высоту баннера, если она была */
+.profile-banner-container {
+  display: none; 
+}
+/* --- 6. ПРОФИЛЬ (ОБНОВЛЕННЫЙ БАННЕР) --- */
+.profile-container { 
+  padding: 20px 20px 40px 20px; /* Убираем верхний отступ, чтобы баннер прилипал к шапке */
+}
+
+.profile-banner-aside {
+  flex-grow: 1;
+  max-width: 1400px; /* Ограничиваем максимальную ширину баннера */
+  margin-right: 20px; /* Явный отступ справа от самого баннера */
+}
+
+.profile-banner-preview {
+  width: 100%;
+  height: 150px; /* Подбери высоту под себя */
+  border-radius: 12px;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-color: #222;
+  border: 1px solid #333;
+  /* Можно добавить box-shadow для объема */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+}
+
+/* Контейнер с именем и аватаром под баннером */
+.profile-main-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  padding: 20px 40px; /* Добавили 60px по бокам, чтобы всё не липло к краям */
+}
+
+.avatar-circle {
+  width: 120px; /* Твой размер аватарки */
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden; /* Обрезает всё, что выходит за пределы круга */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #555; /* Цвет-заглушка, если нет фото */
+}
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Создает одинаковое расстояние между карточками видео */
+  margin-top: 8px;
+}
+.rec-card {
+  display: flex;
+  gap: 10px; /* Отступ между миниатюрой и текстом */
+  text-decoration: none;
+  color: inherit;
+}
+.rec-thumb {
+  width: 140px;
+  min-width: 140px;
+  height: 78px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #222;
+}
+.rec-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rec-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 4px; /* Отступ между заголовком и именем автора */
+}
+.author-info-link {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Расстояние от аватарки до текста */
+  text-decoration: none;
+  color: inherit;
+}
+.author-avatar, .avatar-circle-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ff4500; /* Яркий цвет для заглушки (первой буквы) */
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+.author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.author-name-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px; /* Расстояние между никнеймом и подписчиками */
+}
+.author-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.subs-count {
+  font-size: 12px;
+  color: #aaa; /* Делаем подписчиков чуть блеклыми, как на YouTube */
+}
+/* Блок описания под автором */
+.video-description-box {
+  background-color: #121212; /* Темно-серый фон плашки */
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 16px;
+  margin-bottom: 24px; /* Отступ до секции комментариев */
+}
+
+/* Строка с просмотрами и датой */
+.description-meta {
+  font-weight: 600;
+  font-size: 14px;
+  color: #f1f1f1;
+  margin-bottom: 8px;
+}
+
+/* Сам текст описания */
+.description-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #dfdfdf;
+  white-space: pre-wrap; /* Чтобы сохранялись переносы строк, если описание длинное */
+  margin: 0;
+}
+.like-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #272727; /* Стандартный фон кнопки */
+  border: 1px solid #3f3f3f;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  color: #fff; /* Цвет цифры счётчика */
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.like-icon-svg-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.like-icon-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Эффект при наведении */
+.like-button:hover {
+  background-color: #3f3f3f;
+}
+
+/* Изменение фона кнопки, когда лайк АКТИВЕН */
+.like-button.active {
+  background-color: rgba(255, 0, 0, 0.1); /* Слегка красноватый фон для сочности */
+  border-color: rgba(255, 0, 0, 0.3);
+  color: #ff0000; /* Делаем цифру счётчика тоже красной */
+}
+/* Контейнер правого блока в шапке */
+.user-profile-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Ссылка-обертка для аватарки */
+.header-avatar-link {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.header-avatar-link:hover {
+  transform: scale(1.05); /* Легкий интерактив при наведении */
+}
+
+/* Сама картинка аватарки в шапке */
+.header-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Чтобы фотка не сжималась и не искажалась */
+}
+
+/* Заглушка с буквой, если фото профиля не установлено */
+.header-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #3ea6ff; /* Красивый синий цвет YouTube */
+  color: #0f0f0f;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.header-avatar-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #555;
+}
