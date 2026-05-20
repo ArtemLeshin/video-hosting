@@ -376,6 +376,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
 // --- СТРАНИЦА: ПРОФИЛЬ ---
 
 // --- СТРАНИЦА: ПРОФИЛЬ ---
+// --- СТРАНИЦА: ПРОФИЛЬ ---
 function Profile({ token, currentUsername, videos, refreshVideos, onLogout, searchQuery, setSearchQuery, userAvatar }) {
   const { userId } = useParams(); 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -419,7 +420,7 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
         refreshVideos();
       }
     } catch (err) {
-      console.error("Ошибка:", err);
+      console.error("Ошибка при загрузке баннера:", err);
     }
   };
 
@@ -428,24 +429,23 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     if (!file) return;
     
     const formData = new FormData();
-    // Передаем файл под всеми возможными именами, чтобы Django точно нашёл свой ключ
+    // Бэкенд ждет строго ключ 'avatar'
     formData.append('avatar', file); 
-    formData.append('image', file);
-    formData.append('avatar_file', file);
-    formData.append('profile_picture', file);
     
-    axios.patch('https://mutube-dreamshelter.amvera.io/api/user/profile/', formData, {
+    // Бэкенд ждет POST-запрос на специальный эндпоинт для аватара
+    axios.post('https://mutube-dreamshelter.amvera.io/api/user/avatar/', formData, {
       headers: { 
         'Authorization': `Token ${token}`, 
         'Content-Type': 'multipart/form-data' 
       }
     })
     .then(() => { 
+      // При успешном ответе обновляем видео, чтобы подтянулась новая картинка
       refreshVideos(); 
     })
     .catch(err => {
-      console.error("Ошибка при сохранении аватара через профиль:", err.response?.data || err);
-      alert("Не удалось сохранить аватар. Проверь ответы бэкенда в консоли.");
+      console.error("Ошибка при сохранении аватара:", err.response?.data || err);
+      alert("Не удалось сохранить аватар. Проверь консоль.");
     });
   };
 
@@ -465,7 +465,6 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     }).then(() => { 
       refreshVideos(); 
       setIsModalOpen(false); 
-      // Очистка формы
       setTitle('');
       setDescription('');
       setVideoFile(null);
