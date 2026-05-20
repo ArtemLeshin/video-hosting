@@ -424,10 +424,12 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
     const formData = new FormData();
-    formData.append('avatar', file);
-
-    // ВАРИАНТ 1: Пробуем обновить через эндпоинт профиля (как и баннер)
+    // 'avatar' — стандартное имя поля в сериализаторе профиля Django
+    formData.append('avatar', file); 
+    
+    // Стучимся строго PATCH-методом на рабочий эндпоинт профиля (как у баннера)
     axios.patch('https://mutube-dreamshelter.amvera.io/api/user/profile/', formData, {
       headers: { 
         'Authorization': `Token ${token}`, 
@@ -435,25 +437,12 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
       }
     })
     .then(() => { 
+      // Обновляем данные на странице, чтобы увидеть изменения
       refreshVideos(); 
     })
     .catch(err => {
-      console.warn("Эндпоинт профиля не подошел, пробуем отдельный эндпоинт аватара...");
-      
-      // ВАРИАНТ 2: Если первый упал, пробуем изолированный урл (строго со слэшем на конце)
-      axios.post('https://mutube-dreamshelter.amvera.io/api/user/avatar/', formData, {
-        headers: { 
-          'Authorization': `Token ${token}`, 
-          'Content-Type': 'multipart/form-data' 
-        }
-      })
-      .then(() => { 
-        refreshVideos(); 
-      })
-      .catch(finalErr => {
-        console.error("Оба эндпоинта вернули ошибку. Проверь videos/urls.py на бэкенде!", finalErr);
-        alert("Не удалось загрузить аватар. Проверь консоль браузера.");
-      });
+      console.error("Ошибка при сохранении аватара через профиль:", err.response?.data || err);
+      alert("Не удалось сохранить аватар. Похоже, поле в Django называется не 'avatar'.");
     });
   };
 
@@ -498,21 +487,22 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
           <div className="profile-user-core">
             <div className="avatar-wrapper">
               <div className="avatar-circle">
-                <div className="avatar-circle">
-                  {profileOwnerVideo?.author?.avatar ? (
-                    <img 
-                      src={profileOwnerVideo.author.avatar} 
-                      alt="" 
-                      className="profile-avatar-img" 
-                      onError={(e) => {
-                        e.target.style.display = 'none'; // Скрываем битый URL
-                        e.target.parentNode.innerText = profileOwnerName?.[0].toUpperCase(); // Ставим букву
-                      }}
-                    />
-                  ) : (
-                    profileOwnerName?.[0].toUpperCase()
-                  )}
-                </div>
+                {profileOwnerVideo?.author?.avatar ? (
+                  <img 
+                    src={profileOwnerVideo.author.avatar} 
+                    alt="" 
+                    className="profile-avatar-img" 
+                    onError={(e) => {
+                      e.target.style.display = 'none'; // Скрываем битый URL
+                      // Находим родительский див .avatar-circle и пишем туда букву
+                      e.target.closest('.avatar-circle').innerText = profileOwnerName?.[0].toUpperCase(); 
+                    }}
+                  />
+                ) : (
+                  profileOwnerName?.[0].toUpperCase()
+                )}
+              </div>
+              
               {isMyOwnProfile && (
                 <label className="avatar-edit-label">
                   <span>📷</span>
@@ -520,19 +510,6 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
                 </label>
               )}
             </div>
-
-            <div className="profile-text-info">
-              <h1 className="profile-name">{profileOwnerName}</h1>
-              <p className="profile-stats">
-                @{profileOwnerName?.toLowerCase().replace(/\s+/g, '')} • {displayVideos.length} видео
-              </p>
-              {isMyOwnProfile && (
-                <button onClick={() => setIsModalOpen(true)} className="btn-upload">
-                  Создать видео
-                </button>
-              )}
-            </div>
-          </div>
 
           <div className="profile-banner-aside">
             <div 
