@@ -374,6 +374,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
 }
 
 // --- СТРАНИЦА: ПРОФИЛЬ ---
+
 function Profile({ token, currentUsername, videos, refreshVideos, onLogout, searchQuery, setSearchQuery, userAvatar }) {
   const { userId } = useParams(); 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -426,7 +427,6 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     if (!file) return;
     
     const formData = new FormData();
-    // 'avatar' — стандартное имя поля в сериализаторе профиля Django
     formData.append('avatar', file); 
     
     // Стучимся строго PATCH-методом на рабочий эндпоинт профиля (как у баннера)
@@ -437,12 +437,11 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
       }
     })
     .then(() => { 
-      // Обновляем данные на странице, чтобы увидеть изменения
       refreshVideos(); 
     })
     .catch(err => {
       console.error("Ошибка при сохранении аватара через профиль:", err.response?.data || err);
-      alert("Не удалось сохранить аватар. Похоже, поле в Django называется не 'avatar'.");
+      alert("Не удалось сохранить аватар. Проверь консоль.");
     });
   };
 
@@ -494,8 +493,7 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
                     className="profile-avatar-img" 
                     onError={(e) => {
                       e.target.style.display = 'none'; // Скрываем битый URL
-                      // Находим родительский див .avatar-circle и пишем туда букву
-                      e.target.closest('.avatar-circle').innerText = profileOwnerName?.[0].toUpperCase(); 
+                      e.target.closest('.avatar-circle').innerText = profileOwnerName?.[0].toUpperCase(); // Ставим букву
                     }}
                   />
                 ) : (
@@ -510,6 +508,19 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
                 </label>
               )}
             </div>
+
+            <div className="profile-text-info">
+              <h1 className="profile-name">{profileOwnerName}</h1>
+              <p className="profile-stats">
+                @{profileOwnerName?.toLowerCase().replace(/\s+/g, '')} • {displayVideos.length} видео
+              </p>
+              {isMyOwnProfile && (
+                <button onClick={() => setIsModalOpen(true)} className="btn-upload">
+                  Создать видео
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="profile-banner-aside">
             <div 
@@ -598,6 +609,7 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     </div>
   );
 }
+
 
 // --- АВТОРИЗАЦИЯ ---
 function AuthPage({ type, setToken, setUsername }) {
