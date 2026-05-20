@@ -1,9 +1,7 @@
 meta:
   environment: python
-  toolchain: pip
-
+  python_version: 3.11
 build:
-  requirementsPath: backend/requirements.txt
-
+  command: pip install -r requirements.txt
 run:
-  command: gunicorn --chdir backend backend.wsgi:application
+  command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
