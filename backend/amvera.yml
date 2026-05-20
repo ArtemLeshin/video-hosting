@@ -1,9 +1,0 @@
-meta:
-  environment: python
-  toolchain: pip
-
-build:
-  requirementsPath: requirements.txt
-
-run:
-  command: gunicorn backend.wsgi:application

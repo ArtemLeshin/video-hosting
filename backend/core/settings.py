@@ -23,12 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-m8p-*(tobw1wvxowzovuu0r#n&)t+w83xfo9g-qwl#p&ah(5-0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
+DEBUG = False
+ALLOWED_HOSTS = ['mutube-dreamshelter.amvera.io', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://mutube-dreamshelter.amvera.io']
 # Application definition
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -42,8 +41,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders'
     
+    
 ]
 CORS_ALLOWED_ORIGINS = [
+    "https://6a0da1c0a6b6f5241b107c43--exquisite-dusk-620e3d.netlify.app",
     "http://localhost:5173",
     "http://localhost:5190",
 ]
@@ -123,7 +124,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = 'static/'
 
 MEDIA_URL = '/media/'

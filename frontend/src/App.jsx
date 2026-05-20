@@ -46,7 +46,7 @@ function Header({ username, searchQuery, setSearchQuery, onLogout, userAvatar })
               <div className="header-avatar-container">
                 {userAvatar ? (
                   <img 
-                    src={userAvatar.startsWith('http') ? userAvatar : `http://127.0.0.1:8000${userAvatar}`} 
+                    src={userAvatar.startsWith('http') ? userAvatar : `https://mutube-dreamshelter.amvera.io${userAvatar}`} 
                     alt={username} 
                     className="header-avatar-img" 
                   />
@@ -141,7 +141,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
       setIsSubscribed(video.author?.is_subscribed || false);
       setSubsCount(video.author?.subscribers_count || 0);
 
-      axios.get(`http://127.0.0.1:8000/api/videos/${id}/comments/`)
+      axios.get(`https://mutube-dreamshelter.amvera.io/api/videos/${id}/comments/`)
         .then(res => setComments(res.data))
         .catch(err => console.error("Ошибка загрузки комментариев", err));
     }
@@ -173,7 +173,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
   const handleLike = () => {
     if (!token) return alert("Войдите, чтобы поставить лайк");
     
-    axios.post(`http://127.0.0.1:8000/api/videos/${id}/like/`, {}, {
+    axios.post(`https://mutube-dreamshelter.amvera.io/api/videos/${id}/like/`, {}, {
       headers: { 'Authorization': `Token ${token}` }
     })
     .then(res => {
@@ -190,7 +190,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
   const handleSubscribe = () => {
     if (!token) return alert("Войдите, чтобы подписаться");
     if (username === video.author.username) return alert("Это ваш канал!");
-    axios.post(`http://127.0.0.1:8000/api/subscribe/${video.author.id}/`, {}, {
+    axios.post(`https://mutube-dreamshelter.amvera.io/api/subscribe/${video.author.id}/`, {}, {
       headers: { 'Authorization': `Token ${token}` }
     })
     .then(res => {
@@ -204,7 +204,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
     e.preventDefault();
     if (!token) return alert("Войдите, чтобы оставить комментарий");
     if (!newComment.trim()) return;
-    axios.post(`http://127.0.0.1:8000/api/videos/${id}/comments/`, 
+    axios.post(`https://mutube-dreamshelter.amvera.io/api/videos/${id}/comments/`, 
       { text: newComment },
       { headers: { 'Authorization': `Token ${token}` } }
     )
@@ -258,7 +258,7 @@ function VideoDetail({ videos, username, onLogout, token, updateAuthorStatus, se
               <Link to={`/profile/${video.author?.id}`} className="author-info-link">
                 <div className="author-avatar">
                   {video.author?.avatar ? (
-                    <img src={video.author.avatar.startsWith('http') ? video.author.avatar : `http://127.0.0.1:8000${video.author.avatar}`} alt="" />
+                    <img src={video.author.avatar.startsWith('http') ? video.author.avatar : `https://mutube-dreamshelter.amvera.io${video.author.avatar}`} alt="" />
                   ) : (
                     <div className="avatar-circle-small">{video.author?.username?.[0].toUpperCase()}</div>
                   )}
@@ -407,7 +407,7 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     formData.append('banner', file);
 
     try {
-      const response = await axios.patch('http://127.0.0.1:8000/api/user/profile/', formData, {
+      const response = await axios.patch('https://mutube-dreamshelter.amvera.io/api/user/profile/', formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
           'Authorization': `Token ${token}` 
@@ -428,7 +428,7 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     if (!file) return;
     const formData = new FormData();
     formData.append('avatar', file);
-    axios.post('http://127.0.0.1:8000/api/profile/update_avatar/', formData, {
+    axios.post('https://mutube-dreamshelter.amvera.io/api/videos/', formData, {
       headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'multipart/form-data' }
     }).then(() => { refreshVideos(); setMessage("✅ Аватар обновлен!"); });
   };
@@ -441,7 +441,7 @@ function Profile({ token, currentUsername, videos, refreshVideos, onLogout, sear
     formData.append('video_file', videoFile);
     formData.append('thumbnail', thumbnailFile);
 
-    axios.post('http://127.0.0.1:8000/api/videos/', formData, {
+    axios.post('https://mutube-dreamshelter.amvera.io/api/videos/', formData, {
       headers: { 
         'Authorization': `Token ${token}`, 
         'Content-Type': 'multipart/form-data' 
@@ -592,7 +592,7 @@ function AuthPage({ type, setToken, setUsername }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const url = type === 'register' ? 'register/' : 'login/';
-    axios.post(`http://127.0.0.1:8000/api/${url}`, formData)
+    axios.post(`https://mutube-dreamshelter.amvera.io/api/${url}`, formData)
       .then(res => {
         if (type === 'login') {
           localStorage.setItem('token', res.data.token);
@@ -633,7 +633,7 @@ export default function App() {
 
   const fetchVideos = () => {
     const config = token ? { headers: { 'Authorization': `Token ${token}` } } : {};
-    axios.get('http://127.0.0.1:8000/api/videos/', config).then(res => setVideos(res.data));
+    axios.get('https://mutube-dreamshelter.amvera.io/api/videos/', config).then(res => setVideos(res.data));
   };
 
   useEffect(() => { fetchVideos(); }, [token]);
