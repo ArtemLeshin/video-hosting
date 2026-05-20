@@ -4,4 +4,5 @@ meta:
 build:
   command: pip install -r requirements.txt
 run:
-  command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+  # Мы добавляем флаг --chdir backend, чтобы gunicorn заходил в нужную папку
+  command: gunicorn --chdir backend core.wsgi:application --bind 0.0.0.0:80
