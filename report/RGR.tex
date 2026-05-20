@@ -41,15 +41,38 @@
 \clubpenalty=10000
 \widowpenalty=10000
 
-%%% Параметры рисунков %%%
+%%% Параметры рисунков и листингов %%%
 
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{float}
-\graphicspath{{photo/}}
+\usepackage{listings}
+\usepackage{xcolor}
+
 \captionsetup[figure]{font=small, width=\textwidth, name=Рисунок, justification=centering}
+\captionsetup[table]{font=small, width=\textwidth, name=Таблица, justification=raggedright}
 \captiondelim{ --- }
+
+%%% Настройка отображения листингов кода %%%
+\definecolor{codebg}{rgb}{0.97,0.97,0.97}
+\definecolor{commentgreen}{rgb}{0,0.4,0}
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    commentstyle=\color{commentgreen},
+    keywordstyle=\color{blue},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt,
+    frame=single,
+    frameround=tttt,
+    showstringspaces=false,
+    extendedchars=true,
+    inputencoding=utf8
+}
+\renewcommand{\lstlistingname}{Листинг}
 
 %%% Гиперссылки %%%
 
@@ -93,23 +116,23 @@
 \begin{center}
     Расчетно-графическое задание \\
     по дисциплине \\
-    \textit{«WEB-Технологии / Дизайн интерфейсов»}
+    \textit{«WEB-Технологии»}
 
     \vspace{20pt}
 
     по теме: \\
-    \uppercase{Разработка и UI/UX проектирование видеоплатформы «MyTube» на основе Django и React}
+    \uppercase{Создание тестовой видеоплатформы с использованием технологий Python для бэкенда, React JS для фронтенда и Figma для дизайна}
 \end{center}
 
 \vfill
 
 \noindent Студент: \\
-\textit{Группа № ИКС-532 \hfill Колесов Г.А.}
+\textit{Группа № ИКС-532 \hfill Лёшин А. С.}
 
 \vspace{20pt}
 
 \noindent Преподаватель: \\
-\textit{старший преподаватель \hfill Андреев А.В.}
+\textit{Старший преподаватель \hfill Андреев А.В.}
 
 \vfill
 
@@ -126,142 +149,278 @@
 % ==========================================
 \section{1 Введение}
 
-Целью курсового проекта является проектирование интерфейса и программная реализация клиент-серверного SPA-приложения для стриминга и обмена видеоконтентом. Проект представляет собой полноценную экосистему, разделенную на изолированный REST API (бэкенд) и интерактивный визуальный интерфейс (фронтенд) с адаптивной версткой под десктопные и мобильные платформы.
+Целью курсового проекта является разработка полноценной видеоплатформы, позволяющей пользователям просматривать, загружать и управлять мультимедийным видеоконтентом. Проект представляет собой современное веб-приложение с распределенной архитектурой клиент-сервер, использующее фреймворк Django для реализации серверного бэкенда и библиотеку React для построения интерактивного фронтенда.
 
 \subsection{1.1 Задачи проекта}
 \begin{itemize}
-    \item Разработка архитектуры базы данных для хранения профилей, видеофайлов и интерактивных связей (лайки, подписки, комментарии).
-    \item Реализация REST API эндпоинтов с безопасной JWT-аутентификацией.
-    \item Проектирование современного UI/UX интерфейса в темной цветовой палитре средствами Tailwind CSS.
-    \item Интеграция клиентской и серверной частей через асинхронные HTTP-запросы.
-    \item Развертывание (деплой) готового веб-приложения на удаленный VDS-сервер под управлением связки Nginx и Gunicorn.
+    \item Разработка структурированного и документированного REST API на базе Django REST Framework.
+    \item Создание надежной системы регистрации и авторизации пользователей с использованием безопасных JWT-токенов.
+    \item Реализация серверного и клиентского функционала для загрузки, обработки и потокового воспроизведения медиафайлов.
+    \item Разработка отзывчивого пользовательского интерфейса на React с применением утилитарного CSS-фреймворка Tailwind CSS.
+    \item Конфигурация серверного окружения и деплой готового проекта на удаленный VDS сервер.
 \end{itemize}
 
 % ==========================================
-% 2. АРХИТЕКТУРА И СТЕК
+% 2. АРХИТЕКТУРА ПРОЕКТА
 % ==========================================
 \section{2 Архитектура проекта}
 
 \subsection{2.1 Стек технологий}
-Интерфейс приложения спроектирован по компонентному принципу, обеспечивающему высокую скорость рендеринга данных и плавность анимаций. Используемый стек технологий представлен в таблице 1.
+Компоненты разработанной системы и их технологическое назначение подробно систематизированы и представлены в таблице 1.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Технологический стек веб-платформы}
+\caption{Технологическая спецификация компонентов}
 \begin{tabular}{|l|l|}
 \hline
 \textbf{Компонент системы} & \textbf{Используемая технология} \\ \hline
-Бэкенд-платформа & Python 3.10+, Django 5.0, Django REST Framework \\ \hline
+Бэкенд-платформа & Django 5.0, Django REST Framework \\ \hline
 Аутентификация сессий & JWT (djangorestframework-simplejwt) \\ \hline
 База данных & Реляционная СУБД SQLite 3 \\ \hline
-Фронтенд-архитектура & React 18, React Router DOM v6, Node.js \\ \hline
-Интерфейс и стилизация & Tailwind CSS (Utility-first framework) \\ \hline
+Фронтенд-архитектура & React 18, React Router DOM v6 \\ \hline
+Стилизация интерфейса & Tailwind CSS \\ \hline
 Асинхронный транспорт & HTTP-клиент Axios \\ \hline
-Продуктовый веб-сервер & Nginx + WSGI-сервер Gunicorn \\ \hline
+Веб-сервер удаленного деплоя & Nginx (Amvera Cloud / VDS) \\ \hline
 \end{tabular}
 \end{table}
 
-\subsection{2.2 Логическая структура репозитория}
-Проект разделен на две независимые директории: \texttt{backend} (логика базы данных, API) и \texttt{frontend} (компоненты интерфейса, стейты, стили), что упрощает изолированную отладку визуального слоя.
+\subsection{2.2 Структура проекта}
+Разделение кодовой базы на независимые каталоги бэкенда и фронтенда обеспечивает изолированную разработку каждого слоя системы. Логическое дерево каталогов проекта приведено в листинге 1.
+
+\begin{lstlisting}[caption={Структура проекта MyTube}]
+video-platform/
+ backend/             # Django бэкенд
+    core/            # Настройки проекта
+    users/           # Приложение управления пользователями
+    videos/          # Приложение управления видеоконтентом
+    media/           # Хранилище загруженных файлов
+ frontend/            # React фронтенд
+     public/          # Статические файлы
+     src/
+         components/  # Переиспользуемые React компоненты
+         pages/       # Страницы приложения
+         contexts/    # Глобальные стейты (Context API)
+         App.js       # Главный корневой компонент
+\end{lstlisting}
 
 % ==========================================
-% 3. ОПИСАНИЕ И ВИЗУАЛИЗАЦИЯ ФУНКЦИЙ
+% 3. РАЗРАБОТКА БЭКЕНДА
 % ==========================================
-\section{3 Визуализация и интерфейсные функции приложения}
+\section{3 Разработка бэкенда}
 
-В данном разделе приведены результаты практической реализации веб-платформы, technical-суть модулей и скриншоты их работы в боевом режиме на сервере.
+\subsection{3.1 Модели данных}
+Архитектура базы данных построена на расширении стандартной модели пользователя для кастомизации профилей (листинг 2) и сущности хранения метаданных видеоконтента (листинг 3).
 
-\subsection{3.1 Модуль JWT-аутентификации пользователей}
-Для защиты персональных данных спроектирована форма регистрации и авторизации. При отправке данных фронтенд получает связку Access/Refresh токенов, сохраняет Access-токен в \texttt{localStorage} и перенаправляет пользователя в личный кабинет через \texttt{AuthContext}. Дизайн форм выполнен в минималистичном стиле с валидацией ошибок ввода.
+\begin{lstlisting}[language=Python, caption={Модель пользователя User}]
+class User(AbstractUser):
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    banner = models.ImageField(upload_to='banners/', null=True, blank=True)
+    bio = models.TextField(max_length=500, blank=True, default='')
+    location = models.CharField(max_length=100, blank=True, default='')
+    website = models.URLField(blank=True, default='')
+    birth_date = models.DateField(null=True, blank=True)
+    subscribers = models.ManyToManyField('self', symmetrical=False, blank=True)
+\end{lstlisting}
 
-Результат работы интерфейса авторизации пользователя представлен на рисунке 1.
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.85\textwidth]{auth_page.png}
-    \caption{Интерфейс формы авторизации пользователя (ввод JWT-токена)}
-\end{figure}
+\begin{lstlisting}[language=Python, caption={Модель видео Video}]
+class Video(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    video_file = models.FileField(upload_to='videos/%Y/%m/')
+    thumbnail = models.ImageField(upload_to='thumbnails/%Y/%m/', null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='videos')
+    views = models.IntegerField(default=0)
+    likes = models.ManyToManyField(User, related_name='liked_videos', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+\end{lstlisting}
 
-\subsection{3.2 Главная страница и функция динамического поиска}
-Главная страница генерирует адаптивную сетку карточек видео (компонент \texttt{VideoCard}), считывая данные из API. Поисковая строка перехватывает ввод пользователя, отправляет асинхронный запрос на \texttt{/api/videos/?search=...} и мгновенно перерисовывает интерфейс без перезагрузки вкладки браузера.
+\subsection{3.2 API Эндпоинты}
+Маршрутизация запросов к REST API серверной части представлена в таблице 2.
 
-Внешний вид главной страницы с результатами поиска контента отображен на рисунке 2.
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.95\textwidth]{main_page.png}
-    \caption{Главная страница видеоплатформы MyTube с поисковой выдачей}
-\end{figure}
+\begin{table}[H]
+\centering
+\small
+\caption{Маршруты REST API подсистемы}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Метод} & \textbf{Эндпоинт} & \textbf{Описание функционала} \\ \hline
+\textbf{POST} & /api/users/register/ & Регистрация нового аккаунта \\ \hline
+\textbf{POST} & /api/users/login/ & Вход в систему (генерация JWT токена) \\ \hline
+\textbf{GET} & /api/users/me/ & Получение данных текущей сессии \\ \hline
+\textbf{GET} & /api/videos/ & Получение полного списка видеороликов \\ \hline
+\textbf{GET} & /api/videos/recommended/ & Запрос блока рекомендованных видео \\ \hline
+\textbf{POST} & /api/videos/ & Загрузка нового видео на сервер \\ \hline
+\textbf{POST} & /api/videos/\{id\}/like/ & Переключение лайка на контенте \\ \hline
+\textbf{POST} & /api/videos/\{id\}/view/ & Инкремент счетчика просмотров \\ \hline
+\textbf{GET} & /api/videos/\{id\}/comments/ & Запрос комментариев под видео \\ \hline
+\textbf{POST} & /api/videos/\{id\}/comments/ & Добавление текстового комментария \\ \hline
+\textbf{DELETE} & /api/videos/\{id\}/ & Изолированное удаление видеоролика \\ \hline
+\textbf{PATCH} & /api/users/\{id\}/update-profile/ & Валидация и обновление профиля \\ \hline
+\end{tabular}
+\end{table}
 
-\subsection{3.3 Модуль кастомного видеоплеера и рекомендаций}
-На странице просмотра выводится разработанный кастомный плеер, управляемый через хуки состояния React. Реализован интерактивный сайдбар (боковая панель), который подгружает рекомендованные видео от того же автора или со схожей тематикой, увеличивая глубину просмотра страниц.
+\subsection{3.3 JWT Аутентификация}
+Интеграция авторизационных ограничений в настройки проекта Django представлена в листинге 4.
 
-Интерфейс плеера и панели рекомендаций показан на рисунке 3.
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.95\textwidth]{player_page.png}
-    \caption{Страница воспроизведения контента и блок связанных рекомендаций}
-\end{figure}
+\begin{lstlisting}[language=Python, caption={Настройка JWT в файле settings.py}]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
-\subsection{3.4 Система реактивного взаимодействия (Лайки и Комментарии)}
-Пользователи могут взаимодействовать с автором контента. Кнопка лайка мгновенно меняет свое активное визуальное состояние (цвет SVG-иконки) и инкрементирует числовое значение. Блок комментариев подгружает историю обсуждений, а добавление нового отзыва методом деструктуризации массива моментально выводит его на экран.
-
-Состояние интерфейса обратной связи продемонстрировано на рисунке 4.
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.95\textwidth]{feedback_page.png}
-    \caption{Интерактивный блок добавления отзывов и счетчик лайков}
-\end{figure}
-
-\subsection{3.5 Управление каналом и кастомизация профиля}
-Интерфейс профиля автора включает отрисовку кастомных графических ассет-элементов: аватарки и широкоформатного горизонтального баннера. Загрузка файлов реализована через объект \texttt{FormData} и метод \texttt{PATCH}, а CSS-свойства семейства \texttt{object-fit} защищают интерфейс от деформации картинок разного разрешения.
-
-Личный кабинет автора с обновленным оформлением представлен на рисунке 5.
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.95\textwidth]{profile_page.png}
-    \caption{Страница канала пользователя с кастомным баннером и аватаром}
-\end{figure}
-
-\subsection{3.6 Модальное окно загрузки видеоконтента}
-Для добавления видеороликов спроектирован всплывающий модальный интерфейс (Modal Window). Форма поддерживает валидацию типов файлов (блокировка загрузки форматов, отличных от MP4) и отображает индикатор для визуального контроля процесса отправки данных на сервер.
-
-Внешний вид модального окна загрузки приведен на рисунке 6.
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.85\textwidth]{upload_modal.png}
-    \caption{Модальное окно загрузки медиафайлов и обложек на сервер}
-\end{figure}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+\end{lstlisting}
 
 % ==========================================
-% 4. ДЕПЛОЙ И НАСТРОЙКА СЕРВЕРА
+% 4. РАЗРАБОТКА ФРОНТЕНДА
 % ==========================================
-\section{4 Развертывание приложения на VDS-сервер}
+\section{4 Разработка фронтенда}
 
-Проект успешно перенесен из локальной среды разработки в продуктивную (Production) на удаленный VDS-сервер с IP-адресом \texttt{62.109.1.29}. 
+\subsection{4.1 Основные компоненты}
 
-В ходе деплоя были настроены следующие системные компоненты:
+\subsubsection{4.1.1 VideoCard --- карточка отображения видео}
+Компонент отвечает за рендеринг превью, заголовка и автора контента в общей сетке выдачи (листинг 5).
+
+\begin{lstlisting}[language=Java, caption={Компонент карточки видео VideoCard.jsx}]
+export default function VideoCard({ video }) {
+  return (
+    <Link to={`/video/${video.id}`} className="block group">
+      <div className="bg-gray-900 rounded-xl overflow-hidden">
+        <div className="relative pb-[56.25%]">
+          {video.thumbnail ? (
+            <img src={video.thumbnail} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-pink-900" />
+          )}
+        </div>
+        <div className="p-3">
+          <h3 className="font-semibold text-white">{video.title}</h3>
+          <p className="text-sm text-gray-400">{video.author?.username}</p>
+        </div>
+      </div>
+    </Link>
+  );
+}
+\end{lstlisting}
+
+\subsubsection{4.1.2 Механизм динамического поиска}
+Запросы к API-серверу для фильтрации контента по строковым паттернам без перезагрузки страницы представлены в листинге 6.
+
+\begin{lstlisting}[language=Java, caption={Реализация поисковой фильтрации}]
+const performSearch = async (query) => {
+  const response = await axios.get(`/videos/?search=${encodeURIComponent(query)}`);
+  setVideos(response.data.results || response.data);
+};
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const query = params.get('search');
+  if (query) performSearch(query);
+}, [window.location.search]);
+\end{lstlisting}
+
+\subsection{4.2 AuthContext --- управление глобальным стейтом авторизации}
+Использование React Context API для обеспечения сквозной аутентификации сессий приведено в листинге 7.
+
+\begin{lstlisting}[language=Java, caption={Контекст авторизации AuthContext.jsx}]
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+
+  const login = async (username, password) => {
+    const response = await axios.post('/users/login/', { username, password });
+    localStorage.setItem('access_token', response.data.access);
+    setUser(response.data.user);
+    return true;
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+\end{lstlisting}
+
+% ==========================================
+% 5. ДЕПЛОЙ НА СЕРВЕР
+% ==========================================
+\section{5 Деплой на сервер}
+
+\subsection{5.1 Настройка системного окружения}
+Установка необходимого серверного программного обеспечения на Linux-дистрибутив VDS (листинг 8).
+
+\begin{lstlisting}[language=bash, caption={Установка зависимостей на сервере}]
+apt update && apt upgrade -y
+apt install -y python3-pip python3-venv nginx nodejs npm
+\end{lstlisting}
+
+\subsection{5.2 Запуск бэкенда через Gunicorn}
+Создание изолированного окружения и инициализация многопоточного WSGI-сервера (листинг 9).
+
+\begin{lstlisting}[language=bash, caption={Настройка и старт процессов Gunicorn}]
+cd /root/video-platform/backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+gunicorn --workers 3 --bind 0.0.0.0:8000 backend.wsgi:application
+\end{lstlisting}
+
+\subsection{5.3 Конфигурация веб-сервера Nginx}
+Настройка проксирования входящих запросов к API и раздача статического билда фронтенда (листинг 10).
+
+\begin{lstlisting}[language=bash, caption={Конфигурационный файл Nginx}]
+server {
+    listen 80;
+    server_name 62.109.1.29;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+    }
+
+    location / {
+        root /root/video-platform/frontend/build;
+        try_files $uri $uri/ /index.html;
+    }
+}
+\end{lstlisting}
+
+% ==========================================
+% 7. РЕЗУЛЬТАТЫ РАБОТЫ
+% ==========================================
+\section{7 Результаты работы}
+В ходе выполнения проекта были достигнуты следующие практические результаты:
 \begin{itemize}
-    \item \textbf{Gunicorn WSGI} --- обеспечивает стабильное исполнение процессов Python и работу Django-бэкенда в фоновом режиме на порту \texttt{8000}.
-    \item \textbf{Nginx Web Server} --- выступает в роли обратного прокси-сервера (Reverse Proxy). Он перехватывает все внешние HTTP-запросы на порт \texttt{80}, распределяет статические файлы скомпилированного React-приложения (\texttt{frontend/build}) и перенаправляет запросы к эндпоинтам бэкенда на локальный порт Gunicorn.
+    \item Разработана и отлажена безопасная регистрация и авторизация пользователей с JWT-токенами.
+    \item Реализован плеер для плавного просмотра видеоконтента.
+    \item Реализован асинхронный модуль загрузки видеоматериалов с генерацией уникальных превью.
+    \item Интегрирована интерактивная система лайков и текстовых комментариев.
+    \item Разработан модуль подписки на каналы выбранных авторов.
+    \item Внедрен реактивный поиск по названиям видеороликов на главном экране.
+    \item Обеспечено редактирование профилей (кастомизация баннера, аватара, биографии).
 \end{itemize}
 
 % ==========================================
-% 5. ВЫВОДЫ И ССЫЛКИ
+% 8. ВЫВОДЫ
 % ==========================================
-\section{5 Трудности, их решение и выводы}
+\section{8 Выводы}
+В ходе выполнения расчетно-графического задания была успешно спроектирована и программно реализована полноценная видеоплатформа «MyTube». Разработано отказоустойчивое REST API средствами Django REST Framework с JWT-аутентификацией сессий. Создан интерактивный визуальный фронтенд-компонент на React с применением утилитарной стилизации Tailwind CSS. Все ключевые модули, включая подписки, комментарии, динамические счетчики и загрузку мультимедиа, были успешно интегрированы и развернуты на удаленном сервере VDS. Поставленные задачи выполнены в полном объеме, закреплен практический опыт построения современных клиент-серверных приложений.
 
-В ходе проектирования UI/UX интерфейса и связывания его с API возникли следующие проблемы:
+% ==========================================
+% 9. ССЫЛКИ НА РЕСУРСЫ
+% ==========================================
+\section{9 Ссылки на ресурсы}
 \begin{itemize}
-    \item \textbf{Блокировка CORS} --- при попытке отправить токены авторизации браузер отклонял запросы. Проблема решена тонкой настройкой CORS-заголовков в бэкенде.
-    \item \textbf{Конфликт миграций модели User} --- расширение стандартных полей пользователя ломало БД. Решено очисткой старых схем и перегенерацией миграций.
-    \item \textbf{Ошибка доступа Nginx (403 Forbidden)} --- сервер не мог прочитать бинарные медиафайлы из папки root. Решено корректировкой прав доступа веб-сервера.
-\end{itemize}
-
-В результате расчетно-графического задания спроектирована современная видеоплатформа «MyTube». Все задачи, включая JWT-авторизацию, динамический поиск, загрузку контента через модальные окна и кастомизацию профилей Tailwind-компонентами, выполнены в полном объеме. Приложение развернуто на удаленном сервере и готово к работе.
-
-\section{6 Ссылки на ресурсы}
-\begin{itemize}
-    \item \textbf{GitHub репозиторий проекта:} \url{https://github.com/ArtemLeshin/programming-in-C/tree/main/web_technologies/RGR}
+    \item \textbf{GitHub репозиторий проекта:} \\ \url{https://github.com/ArtemLeshin/video-hosting}
+    \item \textbf{Адрес опубликованного веб-интерфейса (Netlify):} \\ \url{https://exquisite-dusk-620e3d.netlify.app}
+    \item \textbf{Базовый адрес бэкенд-сервера API (Amvera):} \\ \url{https://mutube-dreamshelter.amvera.io}
+    \item \textbf{Презентация выполнения работы сайта находится в самом низу файла README.md} \\ \url{https://github.com/ArtemLeshin/video-hosting}
 \end{itemize}
 
 \end{document}
